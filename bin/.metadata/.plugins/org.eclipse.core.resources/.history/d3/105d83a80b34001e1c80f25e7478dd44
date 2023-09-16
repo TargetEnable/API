@@ -1,0 +1,23 @@
+package com.example.demo.controllers;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.demo.EnableAccount;
+import com.example.demo.repositories.EnableDao;
+
+@RestController
+public class EnableController {
+	
+	@Autowired
+	EnableDao dao;
+	
+	@PostMapping("/register")
+	public String openAccount(@RequestBody EnableAccount a) {
+		dao.save(a);
+		return("Registered successfully");
+	}
+
+}
