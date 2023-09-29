@@ -17,6 +17,8 @@ public interface IncidentMongoRepository  extends MongoRepository<EnableIncident
 	List<EnableIncident> findByEmail(String email);
 	List<EnableIncident> findByAssignedTo(String name);
 	Optional<EnableIncident> findById(String id);
+	int countByStatus(String status);
+	long countByStatusAndEmail(String status, String email);
 	
 
 }
