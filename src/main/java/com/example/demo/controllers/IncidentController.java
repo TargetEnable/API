@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.Date;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.example.demo.EnableAccount;
 import com.example.demo.EnableIncident;
 import com.example.demo.repositories.IncidentMongoRepository;
 import com.example.demo.repositories.EnableMongoRepository;
@@ -36,7 +39,7 @@ public class IncidentController {
 		
 		Date currentDateTime = new Date();
 	    i.setDateOfIncident(currentDateTime);
-	    
+	    i.setId(UUID.randomUUID());
 	mongoRepository.save(i);
 	 
 	return ResponseEntity.status(HttpStatus.CREATED).body("Incident Details submitted successfully");
@@ -64,8 +67,9 @@ public class IncidentController {
         
         return ResponseEntity.ok(incidents);
     }
+	
 	@PatchMapping("/incidents/support/{id}")
-	public ResponseEntity<String> updateIncidentById(@PathVariable int id, @RequestBody EnableIncident i) {
+	public ResponseEntity<String> updateIncidentById(@PathVariable UUID id, @RequestBody EnableIncident i) {
 		
 	    // First, check if an incident with the given ID exists in the repository
 	    Optional<EnableIncident> existingIncidentOptional = mongoRepository.findById(id);
@@ -101,7 +105,7 @@ public class IncidentController {
         return ResponseEntity.ok(incidents);
     }
 	@PutMapping("/incidents/assign/{id}")
-	public ResponseEntity<String> AssignById(@PathVariable int id, @RequestBody EnableIncident i) {
+	public ResponseEntity<String> AssignById(@PathVariable UUID id, @RequestBody EnableIncident i) {
 	    // First, check if an incident with the given ID exists in the repository
 	    Optional<EnableIncident> existingIncidentOptional = mongoRepository.findById(id);
 
