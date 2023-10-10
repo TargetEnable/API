@@ -6,6 +6,7 @@
 	</section>
 	<section name="MavenProjectImportWizardPage">
 		<list key="rootDirectory">
+			<item value="D:\Project_Enable\Enable_api"/>
 			<item value="C:\Users\admin\OneDrive\Desktop\Projects\java\Enable"/>
 		</list>
 		<list key="projectNameTemplate">

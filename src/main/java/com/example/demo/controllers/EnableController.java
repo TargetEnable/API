@@ -80,6 +80,15 @@ public class EnableController {
         String name = account.getName();
         return ResponseEntity.ok(name);
     }
+	
+	@GetMapping("/IncidentEmail/{email}")
+	public ResponseEntity<String> getNameGeneral(@PathVariable String email) {
+        EnableAccount account = mongoRepository.findByEmail(email);
+        
+        String name = account.getName();
+        return ResponseEntity.ok(name);
+    }
+	
 	@GetMapping("/admin/getsupport")
 	public String[] getSupport() {
 List<EnableAccount> accounts = mongoRepository.findByEmpType("support");
