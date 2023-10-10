@@ -1,7 +1,14 @@
 package com.example.demo.controllers;
 
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
+import java.util.ArrayList;
+import java.util.Date;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.ZoneId;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,9 +21,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.example.demo.EnableIncident;
 import com.example.demo.repositories.IncidentMongoRepository;
+import com.example.demo.repositories.EnableMongoRepository;
 
 @CrossOrigin("*")
 @RestController
@@ -24,11 +31,21 @@ public class IncidentController {
 	
 	@Autowired
 	IncidentMongoRepository mongoRepository;
+	EnableMongoRepository accountRepository;
+	
+	
+	 
 
 	@PostMapping("/incident")
 	public ResponseEntity<String> incidentForm(@RequestBody EnableIncident i) {
+		
+       // Get the current server-side time stamp as a java.util.Date
+		
+		Date currentDateTime = new Date();
+	    i.setDateOfIncident(currentDateTime);
+	    
 	mongoRepository.save(i);
-	
+	 
 	return ResponseEntity.status(HttpStatus.CREATED).body("Incident Details submitted successfully");
 	}
 	@GetMapping("/incidents/{email}")
@@ -40,7 +57,9 @@ public class IncidentController {
         }
         
         return ResponseEntity.ok(incidents);
+        
     }
+	
 	@GetMapping("/support/{name}")
     public ResponseEntity<List<EnableIncident>> getIncidentsByAssignedTo(@PathVariable String name) {
         List<EnableIncident> incidents = mongoRepository.findByAssignedTo(name);
@@ -48,11 +67,13 @@ public class IncidentController {
         if (incidents.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
+       
         
         return ResponseEntity.ok(incidents);
     }
 	@PatchMapping("/incidents/support/{id}")
 	public ResponseEntity<String> updateIncidentById(@PathVariable int id, @RequestBody EnableIncident i) {
+		
 	    // First, check if an incident with the given ID exists in the repository
 	    Optional<EnableIncident> existingIncidentOptional = mongoRepository.findById(id);
 
@@ -67,7 +88,8 @@ public class IncidentController {
 	    // Note: You should implement the logic to update specific fields as needed
 	    existingIncident.setStatus(i.getStatus());
 	    existingIncident.setResolutionDescription(i.getResolutionDescription());
-	    existingIncident.setResolutionDate(i.getResolutionDate());
+	    existingIncident.setResolutionDate(new Date());
+	     // Update the assignedBy field
 	    // ... Update other fields as necessary
 
 	    // Save the updated incident back to the repository
@@ -101,6 +123,7 @@ public class IncidentController {
 	    // Note: You should implement the logic to update specific fields as needed
 	    existingIncident.setAssignedTo(i.getAssignedTo());
 	    existingIncident.setStatus(i.getStatus());
+	    
 	    // ... Update other fields as necessary
 
 	    // Save the updated incident back to the repository
@@ -109,6 +132,100 @@ public class IncidentController {
 	    return ResponseEntity.ok("Incident updated successfully");
 	}
 	
-
-}
+	 
 	
+	@GetMapping("/count")
+    public ResponseEntity<Map<String, Integer>> getIncidentCounts() {
+        Map<String, Integer> incidentCounts = new HashMap<>();
+        
+        // Fetch counts based on status from your database
+        int openCount = mongoRepository.countByStatus("Open");
+        int closedCount = mongoRepository.countByStatus("Closed");
+        int inProgressCount = mongoRepository.countByStatus("In Progress");
+        
+        incidentCounts.put("openCount", openCount);
+        incidentCounts.put("closedCount", closedCount);
+        incidentCounts.put("inProgressCount", inProgressCount);
+        
+        return ResponseEntity.ok(incidentCounts);
+
+	}
+	
+	
+	@GetMapping("/incident-counts/{email}")
+    public ResponseEntity<Map<String, Integer>> getIncidentCountsByEmail(@PathVariable String email) {
+        Map<String, Integer> incidentCounts = new HashMap<>();
+
+        // Fetch counts based on status and email from your database
+        long openCount = mongoRepository.countByStatusAndEmail("Open", email);
+        long closedCount = mongoRepository.countByStatusAndEmail("Closed", email);
+        long inProgressCount = mongoRepository.countByStatusAndEmail("In Progress", email);
+
+        incidentCounts.put("openCount", (int) openCount);
+        incidentCounts.put("closedCount", (int) closedCount);
+        incidentCounts.put("inProgressCount", (int) inProgressCount);
+
+        return ResponseEntity.ok(incidentCounts);
+    }
+	
+	
+	
+	@GetMapping("/incidents-by-week")
+	public ResponseEntity<List<Map<String, Object>>> getIncidentsByWeek() {
+	    List<Map<String, Object>> weeklyIncidentCounts = new ArrayList<>();
+
+	    // Calculate the start date for the recent calendar weeks
+	    LocalDate currentDate = LocalDate.now();
+	    LocalDate startDate = currentDate.minusWeeks(3).with(DayOfWeek.MONDAY);
+
+	    while (startDate.isBefore(currentDate.plusDays(1))) {
+	        LocalDate endDate = startDate.plusDays(6);
+	        Date startDateAsDate = Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+	        Date endDateAsDate = Date.from(endDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+	        long incidentsWithinWeek = mongoRepository.countByDateOfIncidentBetween(
+	            startDateAsDate,
+	            endDateAsDate
+	        );
+
+	        // Create a map to store the week's data
+	        Map<String, Object> weekData = new HashMap<>();
+	        weekData.put("startDate", startDate.toString());
+	        weekData.put("endDate", endDate.toString());
+	        weekData.put("incidentCount", incidentsWithinWeek);
+
+	        weeklyIncidentCounts.add(weekData);
+
+	        // Move to the next calendar week
+	        startDate = startDate.plusDays(7);
+
+	        // Break the loop if the startDate is after the current date
+	        if (startDate.isAfter(currentDate)) {
+	            break;
+	        }
+	    }
+
+	    return ResponseEntity.ok(weeklyIncidentCounts);
+	}
+
+
+	@GetMapping("/incident-priority-count")
+	public ResponseEntity<Map<String, Integer>> getIncidentPriorityCounts() {
+	    Map<String, Integer> incidentPriorityCounts = new HashMap<>();
+
+	    // Fetch counts based on priority from your database
+	    int highPriorityCount = mongoRepository.countByPriority("High");
+	    int mediumPriorityCount = mongoRepository.countByPriority("Medium");
+	    int lowPriorityCount = mongoRepository.countByPriority("Low");
+
+	    incidentPriorityCounts.put("High", highPriorityCount);
+	    incidentPriorityCounts.put("Medium", mediumPriorityCount);
+	    incidentPriorityCounts.put("Low", lowPriorityCount);
+
+	    return ResponseEntity.ok(incidentPriorityCounts);
+	}
+	  
+
+
+	
+}
