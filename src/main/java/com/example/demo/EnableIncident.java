@@ -5,7 +5,6 @@ import java.util.UUID; // Import UUID class
 
 import javax.persistence.Id;
 
-
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "enableIncident")

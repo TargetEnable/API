@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -75,11 +76,22 @@ public class EnableController {
 	
 	@GetMapping("/Empname/{email}")
 	public ResponseEntity<String> getName(@PathVariable String email) {
-        EnableAccount account = mongoRepository.findByEmailAndEmpType(email,"support");
-        
-        String name = account.getName();
-        return ResponseEntity.ok(name);
-    }
+	   
+	        System.out.println("Received request to get name for email: " + email);
+
+	        // Check if a user with the specified email exists
+	        EnableAccount account = mongoRepository.findByEmail(email);
+
+	        if (account != null) {
+	            String name = account.getName();
+	            return ResponseEntity.ok(name);
+	        } else {
+	            System.out.println("No matching user found for email: " + email);
+	            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+	        }
+	    } 
+	
+	
 	
 	@GetMapping("/IncidentEmail/{email}")
 	public ResponseEntity<String> getNameGeneral(@PathVariable String email) {

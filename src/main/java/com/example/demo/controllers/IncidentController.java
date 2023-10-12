@@ -229,5 +229,20 @@ public class IncidentController {
 	  
 
 
+	@GetMapping("/employee-incident-priority-count/{email}")
+	public ResponseEntity<Map<String, Integer>> getEmployeeIncidentPriorityCounts(@PathVariable String email) {
+	    Map<String, Integer> employeeIncidentPriorityCounts = new HashMap<>();
+
+	    // Fetch counts based on priority and email from your database
+	    int highPriorityCount = mongoRepository.countByPriorityAndEmail("High", email);
+	    int mediumPriorityCount = mongoRepository.countByPriorityAndEmail("Medium", email);
+	    int lowPriorityCount = mongoRepository.countByPriorityAndEmail("Low", email);
+
+	    employeeIncidentPriorityCounts.put("High", highPriorityCount);
+	    employeeIncidentPriorityCounts.put("Medium", mediumPriorityCount);
+	    employeeIncidentPriorityCounts.put("Low", lowPriorityCount);
+
+	    return ResponseEntity.ok(employeeIncidentPriorityCounts);
+	}
 	
 }

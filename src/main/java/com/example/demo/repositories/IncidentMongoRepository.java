@@ -24,6 +24,7 @@ public interface IncidentMongoRepository  extends MongoRepository<EnableIncident
 	long countByStatusAndEmail(String status, String email);
 	int countByDateOfIncidentBetween(Date startDateAsDate, Date endDateAsDate);
 	int countByPriority(String string);
+	int countByPriorityAndEmail(String string, String email);
 	
 	
 
