@@ -5,7 +5,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "enableAccounts")
 public class EnableAccount {
 	
-	private int empId;
+	private long empId;
 	private String empType;
 	private String name;
 	private String email;
@@ -22,10 +22,10 @@ public class EnableAccount {
 	public void setEmpType(String empType) {
 		this.empType = empType;
 	}
-	public int getEmpId() {
+	public long getEmpId() {
 		return empId;
 	}
-	public void setEmpId(int empId) {
+	public void setEmpId(long empId) {
 		this.empId = empId;
 	}
 	public String getEmail() {

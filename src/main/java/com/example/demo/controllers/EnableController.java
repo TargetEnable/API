@@ -54,7 +54,7 @@ public class EnableController {
 
 	@PostMapping("/register")
 	 public ResponseEntity<String> openAccount(@RequestBody EnableAccount ca) {
-		int empId = ca.getEmpId();
+		long empId = ca.getEmpId();
 		String email = ca.getEmail();
 		String empType = ca.getEmpType();
 		boolean isDuplicateEmpId = mongoRepository.existsByEmpIdAndEmpType(empId,empType);
